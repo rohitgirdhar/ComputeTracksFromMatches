@@ -3,12 +3,14 @@
 #include <map>
 #include "Img2Idx.hpp"
 #include "Match.hpp"
+#include "Track.hpp"
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
 using namespace std;
 
 void computeTracks(string inp_dir) {
+    map<int, Track> tracks;
     fs::path p(inp_dir);
     if (!fs::is_directory(p)) {
         cerr << "Input is not a directory" << endl;
@@ -22,11 +24,26 @@ void computeTracks(string inp_dir) {
                 img2_iter != fs::directory_iterator(); ++img2_iter) {
             string img2 = img2_iter->path().filename().string();
             int img2_id = Img2Idx::getImgIdx(img2);
-            
             vector<Match> matches = Match::readMatchesFile(img2_iter->path().string());
-            cout << matches.size() << endl;
+            for (auto match : matches) {
+                int t1 = Track::getTrackID(img1_id, match.ftr_id1);
+                int t2 = Track::getTrackID(img2_id, match.ftr_id2);
+                if (t1 != -1) {
+                    Track tr1 = tracks[t1];
+                    tr1.addToTrack(img2_id, match.ftr_id2);
+                } else if (t2 != -1) {
+                    Track tr2 = tracks[t2];
+                    tr2.addToTrack(img1_id, match.ftr_id1);
+                } else {
+                    Track tr3;
+                    tr3.addToTrack(img1_id, match.ftr_id1);
+                    tr3.addToTrack(img2_id, match.ftr_id2);
+                    tracks[tr3.getID()] = tr3;
+                }
+            }
         }
     }
+    cout << tracks.size() << endl;
 }
 
 void help() {

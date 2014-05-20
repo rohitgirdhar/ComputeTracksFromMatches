@@ -6,9 +6,9 @@
 using namespace std;
 
 class Match {
+public:
     int ftr_id1;
     int ftr_id2;
-public:
     Match(int id1, int id2): ftr_id1(id1), ftr_id2(id2) {}
     static vector<Match> readMatchesFile(string fname) {
         ifstream fin(fname.c_str());

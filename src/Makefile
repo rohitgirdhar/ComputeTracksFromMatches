@@ -1,5 +1,5 @@
 CXX += -std=c++0x 
-CXXFLAGS += -O2
+CXXFLAGS += -O2 -g
 INC += -I${BOOST_ROOT}
 LIBS += -L/usr/local/lib/
 LDFLAGS += -lboost_filesystem -lboost_system
