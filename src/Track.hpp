@@ -25,6 +25,10 @@ public:
         return trackStatus;
     }
 
+    size_t size() {
+        return points.size();
+    }
+
     /**
      * Adds a new img feature to this Track, 
      * only if it keeps the track consistent

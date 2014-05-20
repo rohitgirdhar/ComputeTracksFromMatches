@@ -7,6 +7,8 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
+#define TAU 15 // Min number of matches for the matching to be valid
+
 using namespace std;
 
 void computeTracks(string inp_dir) {
@@ -23,8 +25,10 @@ void computeTracks(string inp_dir) {
         for (auto img2_iter = fs::directory_iterator(img1_iter->path());
                 img2_iter != fs::directory_iterator(); ++img2_iter) {
             string img2 = img2_iter->path().filename().string();
+            img2 = img2.substr(sizeof("matches_") - 1);
             int img2_id = Img2Idx::getImgIdx(img2);
             vector<Match> matches = Match::readMatchesFile(img2_iter->path().string());
+            if (matches.size() < TAU) continue;
             for (auto match : matches) {
                 int t1 = Track::getTrackID(img1_id, match.ftr_id1);
                 int t2 = Track::getTrackID(img2_id, match.ftr_id2);
@@ -43,7 +47,9 @@ void computeTracks(string inp_dir) {
             }
         }
     }
-    cout << tracks.size() << endl;
+    for (auto iter = tracks.begin(); iter != tracks.end(); ++iter) {
+        cout << iter->second.size() << " " << iter->second.getStatus() << endl;
+    }
 }
 
 void help() {
