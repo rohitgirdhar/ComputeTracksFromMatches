@@ -7,11 +7,9 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
-#define TAU 20 // Min number of matches for the matching to be valid
-
 using namespace std;
 
-void computeTracks(string inp_dir) {
+void computeTracks(string inp_dir, int tau) {
     fs::path p(inp_dir);
     if (!fs::is_directory(p)) {
         cerr << "Input is not a directory" << endl;
@@ -21,6 +19,7 @@ void computeTracks(string inp_dir) {
             img1_iter != fs::directory_iterator(); ++img1_iter) {
         string img1 = img1_iter->path().filename().string();
         int img1_id = Img2Idx::getImgIdx(img1);
+
         for (auto img2_iter = fs::directory_iterator(img1_iter->path());
                 img2_iter != fs::directory_iterator(); ++img2_iter) {
             string img2 = img2_iter->path().filename().string();
@@ -29,7 +28,7 @@ void computeTracks(string inp_dir) {
             int img2_id = Img2Idx::getImgIdx(img2);
             if (img1_id == img2_id) continue;
             vector<Match> matches = Match::readMatchesFile(img2_iter->path().string());
-            if (matches.size() < TAU) continue;
+            if (matches.size() < tau) continue;
             for (auto match : matches) {
                 int t1 = Track::getTrackID(img1_id, match.ftr_id1);
                 int t2 = Track::getTrackID(img2_id, match.ftr_id2);
@@ -53,14 +52,14 @@ void computeTracks(string inp_dir) {
 }
 
 void help() {
-    cerr << "Usage: ./a.out <matches_dir>" << endl;
+    cerr << "Usage: ./a.out <matches_dir> <tau>" << endl;
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
+    if (argc < 3) {
         help();
         return -1;
     }
-    computeTracks(argv[1]);
+    computeTracks(argv[1], stoi(argv[2]));
     return 0;
 }
