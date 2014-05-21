@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <iostream>
 #include <map>
+#include <sys/time.h>
 #include "Img2Idx.hpp"
 #include "Match.hpp"
 #include "Track.hpp"
@@ -15,13 +16,15 @@ void computeTracks(string inp_dir, int tau, string output_file) {
         cerr << "Input is not a directory" << endl;
         return;
     }
+    timeval begin, end;
     for (auto img1_iter = fs::directory_iterator(p); 
             img1_iter != fs::directory_iterator(); ++img1_iter) {
+        gettimeofday(&begin, NULL);
         string img1 = img1_iter->path().filename().string();
         int img1_id = Img2Idx::getImgIdx(img1);
-
+        int match_file_count = 0;
         for (auto img2_iter = fs::directory_iterator(img1_iter->path());
-                img2_iter != fs::directory_iterator(); ++img2_iter) {
+                img2_iter != fs::directory_iterator(); ++img2_iter, match_file_count++) {
             string img2 = img2_iter->path().filename().string();
             img2 = img2.substr(strlen("matches_"));
             img2 = img2.substr(0, img2.length() - strlen(".txt"));
@@ -48,7 +51,10 @@ void computeTracks(string inp_dir, int tau, string output_file) {
                 }
             }
         }
+        gettimeofday(&end, NULL);
         cerr << "Done for " << img1 << endl;
+        cerr << "> Had " << match_file_count << " matching files" << endl;
+        cerr << "> Time elapsed: " << (double)(end.tv_usec - begin.tv_usec) /1000000.0 << " sec" << endl;
     }
     Track::printGoodTracksNVM(output_file);
     Img2Idx::dumpIdx("Img2Idx.txt");
