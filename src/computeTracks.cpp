@@ -2,6 +2,7 @@
 #include <iostream>
 #include <map>
 #include <sys/time.h>
+#include <time.h>
 #include "Img2Idx.hpp"
 #include "Match.hpp"
 #include "Track.hpp"
@@ -17,9 +18,11 @@ void computeTracks(string inp_dir, int tau, string output_file) {
         return;
     }
     timeval begin, end;
+    clock_t begin_cpu;
     for (auto img1_iter = fs::directory_iterator(p); 
             img1_iter != fs::directory_iterator(); ++img1_iter) {
         gettimeofday(&begin, NULL);
+        begin_cpu = clock();
         string img1 = img1_iter->path().filename().string();
         int img1_id = Img2Idx::getImgIdx(img1);
         int match_file_count = 0;
@@ -55,6 +58,7 @@ void computeTracks(string inp_dir, int tau, string output_file) {
         cerr << "Done for " << img1 << endl;
         cerr << "> Had " << match_file_count << " matching files" << endl;
         cerr << "> Time elapsed: " << end.tv_sec - begin.tv_sec << " sec" << endl;
+        cerr << "> CPU Time elapsed: " << (float)(clock() - begin_cpu)/CLOCKS_PER_SEC << " sec" << endl;
     }
     Track::printGoodTracksNVM(output_file);
     Img2Idx::dumpIdx("Img2Idx.txt");
