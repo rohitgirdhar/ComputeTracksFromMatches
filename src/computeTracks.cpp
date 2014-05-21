@@ -9,7 +9,7 @@ namespace fs = boost::filesystem;
 
 using namespace std;
 
-void computeTracks(string inp_dir, int tau) {
+void computeTracks(string inp_dir, int tau, string output_file) {
     fs::path p(inp_dir);
     if (!fs::is_directory(p)) {
         cerr << "Input is not a directory" << endl;
@@ -48,18 +48,18 @@ void computeTracks(string inp_dir, int tau) {
             }
         }
     }
-    Track::printGoodTracks();
+    Track::printGoodTracksNVM(output_file);
 }
 
 void help() {
-    cerr << "Usage: ./a.out <matches_dir> <tau>" << endl;
+    cerr << "Usage: ./a.out <matches_dir> <tau> <op NVM file>" << endl;
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
+    if (argc < 4) {
         help();
         return -1;
     }
-    computeTracks(argv[1], stoi(argv[2]));
+    computeTracks(argv[1], stoi(argv[2]), argv[3]);
     return 0;
 }

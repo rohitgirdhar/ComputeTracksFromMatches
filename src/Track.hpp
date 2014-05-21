@@ -61,7 +61,17 @@ public:
         Track::imgFtrToTrack[make_pair(imgID, ftrID)] = this->trackID;
         return trackStatus;
     }
-   
+
+    bool isGood() {
+        // Good tracks are:
+        // 1. >2 points
+        // 2. CONSISTENT_TRACK
+        if (getStatus() == Track::CONSISTENT_TRACK && size() > 2) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Merge the 2 tracks into one. Assume tid1 is the smaller one
      */
@@ -112,18 +122,47 @@ public:
     }
 
     static void printGoodTracks() {
-        // Good tracks are:
-        // 1. >2 points
-        // 2. CONSISTENT_TRACK
         for (auto iter = tracks.begin(); iter != tracks.end();
                 ++iter) {
-            if (iter->second->getStatus() == Track::CONSISTENT_TRACK &&
-                iter->second->size() > 2) {
+            if (iter->second->isGood()) {
                 cout << *(iter->second) << endl;
             }
         }
     }
+    
+    static int countGoodTracks() {
+        int count = 0;
+        for (auto iter = tracks.begin(); iter != tracks.end();
+                ++iter) {
+            if (iter->second->isGood()) {
+                count++;
+            }
+        }
+        return count;
+    }
 
+    static void printGoodTracksNVM(string opfile) {
+        ofstream fout(opfile.c_str(), ios::out);
+        fout << "NVM_V3" << endl << endl;
+        fout << "0" << endl << endl; // 0 cameras (not required)
+        // now actual o/p starts
+        fout << Track::countGoodTracks() << endl;
+        for (auto iter = tracks.begin(); iter != tracks.end(); ++iter) {
+            if (iter->second->isGood()) {
+                // print X Y Z
+                fout << "0 0 0 ";
+                // print R G B
+                fout << "0 0 0 ";
+                // # of measurements
+                fout << iter->second->points.size() << " ";
+                for (auto iter2 = iter->second->points.begin(); iter2 != iter->second->points.end(); ++iter2) {
+                    fout << iter2->first << " " << iter2->second << " 0 0 ";
+                }
+                fout << endl;
+            }
+        }
+        fout.close();
+    }
 };
 map< pair<int,int>, int > Track::imgFtrToTrack = map< pair<int,int>, int >();
 map<int, Track*> Track::tracks = map<int, Track*>();
