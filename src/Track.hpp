@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -8,13 +9,21 @@ class Track {
     int trackStatus;
     map<int,int> points; // from imgID => ftrID
     static map< pair<int,int>, int > imgFtrToTrack; // (imgID, ftrID) => trackID
+    static map<int, Track*> tracks;
+    static int objCounter; // counter for Track objects
     // output values
     const static int CONSISTENT_TRACK = 1;
     const static int INCONSISTENT_TRACK = 2;
+
+    void clearItself() {
+        points.clear();
+        imgFtrToTrack.clear();
+    }
+
 public:
     Track() {
-        static int count = 0;
-        trackID = count++;
+        trackID = Track::objCounter++;
+        trackStatus = Track::CONSISTENT_TRACK;
     }
 
     int getID() {
@@ -28,6 +37,17 @@ public:
     size_t size() {
         return points.size();
     }
+    
+    friend ostream & operator<<(ostream &os, Track& t);
+
+    string pointsToString() {
+        ostringstream oss;
+        for (auto iter = points.begin(); 
+                iter != points.end(); ++iter) {
+            oss << Img2Idx::getImgName(iter->first) << "," << iter->second << " ";
+        }
+        return oss.str();
+    }
 
     /**
      * Adds a new img feature to this Track, 
@@ -35,13 +55,19 @@ public:
      */
     int addToTrack(int imgID, int ftrID) {
         if (points.count(imgID)) {
-            return trackStatus = Track::INCONSISTENT_TRACK;
+            trackStatus = Track::INCONSISTENT_TRACK;
         }
         points[imgID] = ftrID;
         Track::imgFtrToTrack[make_pair(imgID, ftrID)] = this->trackID;
         return trackStatus = Track::CONSISTENT_TRACK;
     }
     
+    static Track* getNewTrack() {
+        Track *tr = new Track();
+        tracks[tr->getID()] = tr;
+        return tr;
+    }
+
     /**
      * @return track ID if the given image feature exists in some track.
      * Else returns -1
@@ -52,5 +78,41 @@ public:
         }
         return -1;
     }
+
+    static Track* getTrackReference(int tid) {
+        if (tracks.count(tid)) {
+            return tracks[tid];
+        }
+        return NULL;
+    }
+
+    static void deleteTrack(int tid) {
+        if (!tracks.count(tid)) {
+            cerr << "Track::deleteTrack " << tid << " does not exist" << endl;
+            return;
+        }
+        tracks[tid]->clearItself(); // just to be safe
+        delete tracks[tid];
+        tracks.erase(tid);
+    }
+
+    static void printGoodTracks() {
+        // Good tracks are:
+        // 1. >2 points
+        // 2. CONSISTENT_TRACK
+        for (auto iter = tracks.begin(); iter != tracks.end();
+                ++iter) {
+            if (iter->second->getStatus() == Track::CONSISTENT_TRACK &&
+                iter->second->size() > 2) {
+                cout << *(iter->second) << endl;
+            }
+        }
+    }
+
 };
 map< pair<int,int>, int > Track::imgFtrToTrack = map< pair<int,int>, int >();
+map<int, Track*> Track::tracks = map<int, Track*>();
+int Track::objCounter = 0;
+ostream & operator<<(ostream &os, Track& t) {
+    return os << t.trackID << " : " << t.pointsToString();
+}
