@@ -7,7 +7,7 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
-#define TAU 10 // Min number of matches for the matching to be valid
+#define TAU 20 // Min number of matches for the matching to be valid
 
 using namespace std;
 
@@ -34,7 +34,7 @@ void computeTracks(string inp_dir) {
                 int t1 = Track::getTrackID(img1_id, match.ftr_id1);
                 int t2 = Track::getTrackID(img2_id, match.ftr_id2);
                 if (t1 != -1 && t2 != -1) {
-
+                    Track::mergeTracksAndDeleteOne(t1, t2);
                 } else if (t1 != -1) {
                     Track *tr = Track::getTrackReference(t1);
                     tr->addToTrack(img2_id, match.ftr_id2);

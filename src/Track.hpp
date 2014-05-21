@@ -54,14 +54,29 @@ public:
      * only if it keeps the track consistent
      */
     int addToTrack(int imgID, int ftrID) {
-        if (points.count(imgID)) {
+        if (points.count(imgID) && points[imgID] != ftrID) {
             trackStatus = Track::INCONSISTENT_TRACK;
         }
         points[imgID] = ftrID;
         Track::imgFtrToTrack[make_pair(imgID, ftrID)] = this->trackID;
-        return trackStatus = Track::CONSISTENT_TRACK;
+        return trackStatus;
     }
-    
+   
+    /**
+     * Merge the 2 tracks into one. Assume tid1 is the smaller one
+     */
+    static void mergeTracksAndDeleteOne(int tid1, int tid2) {
+        if (tracks[tid1]->size() > tracks[tid2]->size()) {
+            Track::mergeTracksAndDeleteOne(tid2, tid1);
+            return;
+        }
+        for (auto iter = tracks[tid1]->points.begin();
+                iter != tracks[tid1]->points.end(); ++iter) {
+            tracks[tid2]->addToTrack(iter->first, iter->second);
+        }
+        deleteTrack(tid1);
+    }
+
     static Track* getNewTrack() {
         Track *tr = new Track();
         tracks[tr->getID()] = tr;
