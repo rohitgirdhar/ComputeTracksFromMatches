@@ -54,7 +54,7 @@ void computeTracks(string inp_dir, int tau, string output_file) {
         gettimeofday(&end, NULL);
         cerr << "Done for " << img1 << endl;
         cerr << "> Had " << match_file_count << " matching files" << endl;
-        cerr << "> Time elapsed: " << (double)(end.tv_usec - begin.tv_usec) /1000000.0 << " sec" << endl;
+        cerr << "> Time elapsed: " << end.tv_sec - begin.tv_sec << " sec" << endl;
     }
     Track::printGoodTracksNVM(output_file);
     Img2Idx::dumpIdx("Img2Idx.txt");
