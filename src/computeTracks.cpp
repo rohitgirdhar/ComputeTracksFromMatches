@@ -49,6 +49,7 @@ void computeTracks(string inp_dir, int tau, string output_file) {
         }
     }
     Track::printGoodTracksNVM(output_file);
+    Img2Idx::dumpIdx("Img2Idx.txt");
 }
 
 void help() {

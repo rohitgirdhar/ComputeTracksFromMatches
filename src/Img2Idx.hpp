@@ -1,5 +1,7 @@
 #include <string>
 #include <map>
+#include <fstream>
+#include <iostream>
 
 using namespace std;
 /**
@@ -24,6 +26,19 @@ class Img2Idx {
             return Img2Idx::invIndex[id];
         }
         return "";
+    }
+
+    /**
+     * Writes the id => img_id mapping to a file
+     * The img_id on line # i corresponds to id = i
+     */
+    static void dumpIdx(string fpath) {
+        ofstream fout(fpath.c_str());
+        for (auto iter = Img2Idx::invIndex.begin();
+                iter != Img2Idx::invIndex.end(); ++iter) {
+            fout << iter->second << endl;
+        }
+        fout.close();
     }
 };
 map<string, int> Img2Idx::index = map<string, int>();
