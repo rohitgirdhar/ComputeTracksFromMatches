@@ -29,7 +29,8 @@ void computeTracks(string inp_dir, int tau, string output_file) {
             if (img1_id == img2_id) continue;
             vector<Match> matches = Match::readMatchesFile(img2_iter->path().string());
             if (matches.size() < tau) continue;
-            for (auto match : matches) {
+            for (int i = 0; i < matches.size(); i++) {
+                Match match = matches[i];
                 int t1 = Track::getTrackID(img1_id, match.ftr_id1);
                 int t2 = Track::getTrackID(img2_id, match.ftr_id2);
                 if (t1 != -1 && t2 != -1) {
